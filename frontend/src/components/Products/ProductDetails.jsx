@@ -1,5 +1,4 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react"
 import styles from "../../styles/styles"
 import ProductDetailsInfo from "./ProductDetailsInfo"
 import {
@@ -8,12 +7,21 @@ import {
 	AiOutlineShoppingCart,
 	AiOutlineMessage,
 } from "react-icons/ai"
+import { useDispatch, useSelector } from "react-redux"
+import { getAllProductsShop } from "../../redux/actions/product"
+import { backend_url } from "../../server"
 
 function ProductDetails({ data }) {
 	const [count, setCount] = useState(1)
 	const [click, setClick] = useState(false)
 	const [select, setSelect] = useState(0)
-	const navigate = useNavigate()
+	const dispatch = useDispatch()
+
+	const { products } = useSelector((state) => state.product)
+
+	useEffect(() => {
+		dispatch(getAllProductsShop(data && data.shop._id))
+	}, [dispatch, data])
 
 	const incrementCount = () => {
 		setCount(count + 1)
@@ -35,47 +43,39 @@ function ProductDetails({ data }) {
 						<div className="block w-full 800px:flex">
 							<div className="w-full 800px:w-[50%]">
 								<img
-									src={data.image_Url[select].url}
+									src={`${backend_url}${data.images[select]}`}
 									alt=""
 									className=" w-[80%]"
 								/>
 
-								<div className="w-full flex">
-									<div
-										className={`${
-											select === 0 ? "border" : "null"
-										} cursor-pointer`}>
-										<img
-											className=" h-[200px]"
-											src={data?.image_Url[0].url}
-											alt=""
-											onClick={() => setSelect(0)}
-										/>
-									</div>
-
-									<div
-										className={`${
-											select === 1 ? "border" : "null"
-										} cursor-pointer`}>
-										<img
-											className=" h-[200px]"
-											src={data?.image_Url[1].url}
-											alt=""
-											onClick={() => setSelect(1)}
-										/>
-									</div>
+								<div className="w-full gap-2 flex overflow-x-scroll">
+									{data &&
+										data.images.map((i, index) => (
+											<div
+												key={index}
+												className={`${
+													select === 0 ? "border" : "null"
+												} cursor-pointer`}>
+												<img
+													className=" h-[150px] object-cover overflow-hidden mr-3 mt-3"
+													src={`${backend_url}${i}`}
+													alt=""
+													onClick={() => setSelect(index)}
+												/>
+											</div>
+										))}
 								</div>
 							</div>
-							<div className="w-full 800px:w-[50%] pt-5">
+							<div className="w-full 800px:w-[50%] pt-5 800px:ml-5">
 								<h1 className={`${styles.productTitle}`}>{data.name}</h1>
 
 								<p>{data.description}</p>
 								<div className="flex pt-3">
 									<h4 className={`${styles.productDiscountPrice}`}>
-										{data.discount_price}$
+										{data.discountPrice}$
 									</h4>
 									<h3 className={`${styles.price}`}>
-										{data.price ? data.price + "$" : null}
+										{data.originalPrice ? data.originalPrice + "$" : null}
 									</h3>
 								</div>
 
@@ -126,7 +126,7 @@ function ProductDetails({ data }) {
 
 								<div className="flex items-center pt-8">
 									<img
-										src={data.shop.shop_avatar.url}
+										src={`${backend_url}${data?.shop?.avatar}`}
 										alt=""
 										className="w-[50px] h-[50px] rounded-full mr-2"
 									/>
@@ -134,9 +134,7 @@ function ProductDetails({ data }) {
 										<h3 className={`${styles.shop_name} pb-1 pt-1`}>
 											{data.shop.name}
 										</h3>
-										<h5 className="pb-3 text-[15px]">
-											({data.shop.ratings}) Ratings
-										</h5>
+										<h5 className="pb-3 text-[15px]">(4.5) Ratings</h5>
 									</div>
 									<div
 										className={`${styles.button} bg-[#6443d1] mt-4 !rounded !h-11`}
@@ -149,7 +147,7 @@ function ProductDetails({ data }) {
 							</div>
 						</div>
 					</div>
-					<ProductDetailsInfo data={data} />
+					<ProductDetailsInfo data={data} products={products} />
 					<br />
 					<br />
 				</div>

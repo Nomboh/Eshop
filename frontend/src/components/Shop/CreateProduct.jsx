@@ -1,7 +1,10 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { categoriesData } from "../../static/data"
+import { AiOutlinePlusCircle } from "react-icons/ai"
+import { createProduct } from "../../redux/actions/product"
+import { toast } from "react-toastify"
 
 function CreateProduct() {
 	const { seller } = useSelector((state) => state.seller)
@@ -17,8 +20,45 @@ function CreateProduct() {
 	const [discountPrice, setDiscountPrice] = useState()
 	const [stock, setStock] = useState()
 
+	const { isLoading, success, error } = useSelector((state) => state.product)
+
+	useEffect(() => {
+		if (error) {
+			toast.error("Product Creation Declined")
+		}
+
+		if (success) {
+			toast.success("Product Creation Successful")
+			navigate("/dashboard-products")
+			window.location.reload()
+		}
+	}, [dispatch, error, success])
+
 	const handleSubmit = (e) => {
 		e.preventDefault()
+		const newForm = new FormData()
+
+		images.forEach((image) => {
+			newForm.append("images", image)
+		})
+
+		newForm.append("name", name)
+		newForm.append("description", description)
+		newForm.append("category", category)
+		newForm.append("tags", tags)
+		newForm.append("originalPrice", originalPrice)
+		newForm.append("discountPrice", discountPrice)
+		newForm.append("stock", stock)
+		newForm.append("shopId", seller._id)
+
+		dispatch(createProduct(newForm))
+	}
+	const handleImageChange = (e) => {
+		e.preventDefault()
+
+		let files = Array.from(e.target.files)
+
+		setImages((prevImages) => [...prevImages, ...files])
 	}
 
 	return (
@@ -46,14 +86,15 @@ function CreateProduct() {
 					<label htmlFor="description" className="pb-2">
 						Description <span className=" text-red-500">*</span>
 					</label>
-					<input
+					<textarea
+						cols={30}
+						rows={8}
 						type="text"
 						name="description"
 						value={description}
-						className="mt-2 appearance-none block w-full px-3 h-[35px] border-gray-300 rounded-[3px] placeholder-gray-400 focus:outline-none focus:ring-blue-500 sm:text-sm"
+						className="mt-2 appearance-none block w-full pt-3 px-3 h-[35px] border-gray-300 rounded-[3px] placeholder-gray-400 focus:outline-none focus:ring-blue-500 sm:text-sm"
 						onChange={(e) => setDescription(e.target.value)}
-						placeholder="Product description"
-					/>
+						placeholder="Product description"></textarea>
 				</div>
 				<br />
 
@@ -122,6 +163,59 @@ function CreateProduct() {
 					/>
 				</div>
 				<br />
+
+				<div className="">
+					<label htmlFor="stock" className="pb-2">
+						Product Stock <span className=" text-red-500">*</span>
+					</label>
+					<input
+						type="number"
+						name="stock"
+						value={stock}
+						className="mt-2 appearance-none block w-full px-3 h-[35px] border-gray-300 rounded-[3px] placeholder-gray-400 focus:outline-none focus:ring-blue-500 sm:text-sm"
+						onChange={(e) => setStock(e.target.value)}
+						placeholder="Set product stock"
+					/>
+				</div>
+				<br />
+
+				<div className="">
+					<label htmlFor="images" className="pb-2">
+						Product Images <span className=" text-red-500">*</span>
+					</label>
+					<input
+						type="file"
+						name="images"
+						id="upload"
+						className=" hidden"
+						multiple
+						onChange={handleImageChange}
+					/>
+
+					<label htmlFor="upload" className="">
+						<AiOutlinePlusCircle className=" mt-3" size={30} color="#555" />
+					</label>
+					<div className="w-full flex items-center flex-wrap">
+						{images &&
+							images.map((image, i) => (
+								<img
+									key={i}
+									src={URL.createObjectURL(image)}
+									alt=""
+									className=" h-[120px] w-[120px] object-cover m-2"
+								/>
+							))}
+					</div>
+				</div>
+				<br />
+
+				<div className="">
+					<input
+						type="submit"
+						value="Create"
+						className="mt-2 appearance-none block w-full px-3 h-[35px] border-gray-300 rounded-[3px] placeholder-gray-400 focus:outline-none focus:ring-blue-500 sm:text-sm"
+					/>
+				</div>
 			</form>
 		</div>
 	)

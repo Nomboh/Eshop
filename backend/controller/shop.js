@@ -161,4 +161,42 @@ router.get(
 	})
 )
 
+// Logout out of shop
+router.get(
+	"/logout",
+	isSeller,
+	catchAsyncErrors(async (req, res, next) => {
+		try {
+			res.cookie("seller_token", null, {
+				expires: new Date(Date.now()),
+				httpOnly: true,
+				Secure: true,
+			})
+
+			res.status(200).json({
+				success: true,
+				message: "User logged out successfully",
+			})
+		} catch (error) {
+			return next(new ErrorHandler(error.message, 500))
+		}
+	})
+)
+
+// Get shop info
+router.get(
+	"/get-shop-info/:id",
+	catchAsyncErrors(async (req, res, next) => {
+		try {
+			const shop = await Shop.findById(req.params.id)
+			res.status(201).json({
+				success: true,
+				shop,
+			})
+		} catch (error) {
+			return next(new ErrorHandler(error.message, 500))
+		}
+	})
+)
+
 module.exports = router

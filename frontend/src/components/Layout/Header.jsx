@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { Link } from "react-router-dom"
 import styles from "../../styles/styles"
-import { categoriesData, productData } from "../../static/data"
+import { categoriesData } from "../../static/data"
 import {
 	AiOutlineHeart,
 	AiOutlineSearch,
@@ -20,7 +20,7 @@ import WishList from "../Wishlist/WishList"
 
 const Header = ({ activeHeading }) => {
 	const { isAuthenticated, user } = useSelector((state) => state.user)
-
+	const { allProducts } = useSelector((state) => state.product)
 	const [searchTerm, setSearchTerm] = useState("")
 	const [searchData, setSearchData] = useState(null)
 	const [active, setActive] = useState(false)
@@ -33,9 +33,11 @@ const Header = ({ activeHeading }) => {
 		const term = e.target.value
 		setSearchTerm(term)
 
-		const filteredProducts = productData.filter((product) =>
-			product.name.toLowerCase().includes(term.toLowerCase())
-		)
+		const filteredProducts =
+			allProducts &&
+			allProducts.filter((product) =>
+				product.name.toLowerCase().includes(term.toLowerCase())
+			)
 		setSearchData(filteredProducts)
 	}
 
@@ -83,7 +85,7 @@ const Header = ({ activeHeading }) => {
 											<Link to={`/product/${Product_name}`}>
 												<div className="w-full flex items-start-py-3">
 													<img
-														src={i.image_Url[0].url}
+														src={`${backend_url}${i.images[0]}`}
 														alt=""
 														className="w-[40px] h-[40px] mr-[10px]"
 													/>

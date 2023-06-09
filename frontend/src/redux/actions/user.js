@@ -36,7 +36,6 @@ export const loadSeller = () => async (dispatch) => {
 			type: "LoadSellerSuccess",
 			payload: data.seller,
 		})
-		console.log(data)
 	} catch (error) {
 		console.log(error)
 		dispatch({
