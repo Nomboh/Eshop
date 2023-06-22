@@ -3,33 +3,35 @@ import Header from "../components/Layout/Header"
 import Footer from "../components/Layout/Footer"
 import ProductDetail from "../components/Products/ProductDetails"
 import SuggestedProduct from "../components/Products/SuggestedProduct"
-import { useParams } from "react-router-dom"
+import { useParams, useSearchParams } from "react-router-dom"
 import { useSelector } from "react-redux"
 
 function ProductDetailPage() {
-	const { name } = useParams()
+	const { id } = useParams()
+	const [searchParams] = useSearchParams()
 	const [data, setData] = useState(null)
 	const { allProducts } = useSelector((state) => state.product)
+	const { allEvents } = useSelector((state) => state.event)
 
-	const productName = name.replace(/-/g, " ")
+	const eventData = searchParams.get("isEvent")
 
 	useEffect(() => {
-		if (allProducts) {
-			const d = allProducts.find((i) => i.name === productName)
-			console.log(
-				allProducts.find(
-					(p) => p.name.toLowerCase() === productName.toLowerCase()
-				)
-			)
+		if (eventData) {
+			const d = allEvents && allEvents.find((i) => i._id === id)
+
+			setData(d)
+		} else {
+			const d = allProducts && allProducts.find((i) => i._id === id)
+
 			setData(d)
 		}
-	}, [allProducts])
+	}, [id, allProducts, eventData])
 
 	return (
 		<div>
 			<Header />
 			<ProductDetail data={data} />
-			{data && <SuggestedProduct data={data} />}
+			{!eventData && data && <SuggestedProduct data={data} />}
 			<Footer />
 		</div>
 	)

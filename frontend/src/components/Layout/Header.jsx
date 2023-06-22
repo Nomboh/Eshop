@@ -20,6 +20,9 @@ import WishList from "../Wishlist/WishList"
 
 const Header = ({ activeHeading }) => {
 	const { isAuthenticated, user } = useSelector((state) => state.user)
+	const { isSeller } = useSelector((state) => state.seller)
+	const { cart } = useSelector((state) => state.cart)
+	const { wishlist } = useSelector((state) => state.wishlist)
 	const { allProducts } = useSelector((state) => state.product)
 	const [searchTerm, setSearchTerm] = useState("")
 	const [searchData, setSearchData] = useState(null)
@@ -77,12 +80,9 @@ const Header = ({ activeHeading }) => {
 						{searchData && searchData.length !== 0 ? (
 							<div className="absolute min-h-[30vh] bg-slate-50 shadow-sm-2 z-[9] p-4">
 								{searchData &&
-									searchData.map((i, index) => {
-										const d = i.name
-
-										const Product_name = d.replace(/\s+/g, "-")
+									searchData.map((i) => {
 										return (
-											<Link to={`/product/${Product_name}`}>
+											<Link key={i._id} to={`/product/${i._id}`}>
 												<div className="w-full flex items-start-py-3">
 													<img
 														src={`${backend_url}${i.images[0]}`}
@@ -99,9 +99,10 @@ const Header = ({ activeHeading }) => {
 					</div>
 
 					<div className={`${styles.button}`}>
-						<Link to="/shop-create">
+						<Link to={isSeller ? "/dashboard" : "/shop-create"}>
 							<h1 className="text-[#fff] flex items-center">
-								Become Seller <IoIosArrowForward className="ml-1" />
+								{isSeller ? "Dashboard" : "Become Seller"}
+								<IoIosArrowForward className="ml-1" />
 							</h1>
 						</Link>
 					</div>
@@ -151,7 +152,7 @@ const Header = ({ activeHeading }) => {
 							<div className="relative cursor-pointer mr-[15px]">
 								<AiOutlineHeart size={30} color="rgb(255 255 255 / 83%)" />
 								<span className="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px] leading-tight text-center">
-									0
+									{wishlist && wishlist.length}
 								</span>
 							</div>
 						</div>
@@ -167,7 +168,7 @@ const Header = ({ activeHeading }) => {
 									color="rgb(255 255 255 / 83%)"
 								/>
 								<span className="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px] leading-tight text-center">
-									1
+									{cart && cart.length}
 								</span>
 							</div>
 						</div>
@@ -231,7 +232,7 @@ const Header = ({ activeHeading }) => {
 							className="relative mr-[20px]">
 							<AiOutlineShoppingCart size={30} />
 							<span class="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px]  leading-tight text-center">
-								1
+								{cart && cart.length}
 							</span>
 						</div>
 					</div>

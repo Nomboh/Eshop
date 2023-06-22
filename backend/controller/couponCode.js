@@ -1,7 +1,7 @@
 const express = require("express")
 const catchAsyncErrors = require("../middleware/catchAsyncErrors")
 const ErrorHandler = require("../utils/ErrorHandler")
-const { isSeller } = require("../middleware/auth")
+const { isSeller, isAuthenticated } = require("../middleware/auth")
 const CouponCode = require("../model/couponCode")
 const router = express.Router()
 
@@ -62,6 +62,23 @@ router.delete(
 			res.status(201).json({
 				success: true,
 				message: "Coupon code deleted successfully!",
+			})
+		} catch (error) {
+			return next(new ErrorHandler(error, 400))
+		}
+	})
+)
+
+// get a single coupoun code of a shop
+router.get(
+	"/get-couponCode/:name",
+	catchAsyncErrors(async (req, res, next) => {
+		try {
+			const couponCode = await CouponCode.findOne({ name: req.params.name })
+
+			res.status(200).json({
+				success: true,
+				couponCode,
 			})
 		} catch (error) {
 			return next(new ErrorHandler(error, 400))

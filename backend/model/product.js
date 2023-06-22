@@ -27,9 +27,21 @@ const productSchema = new mongoose.Schema(
 		},
 
 		stock: {
-			type: String,
+			type: Number,
 			require: [true, "Please enter your product Stock"],
 		},
+
+		reviews: [
+			{
+				user: Object,
+				rating: Number,
+				comment: String,
+				productId: String,
+				orderId: String,
+			},
+		],
+
+		ratings: Number,
 
 		images: [
 			{

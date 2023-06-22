@@ -10,6 +10,7 @@ const jwt = require("jsonwebtoken")
 const sendMail = require("../utils/sendMail")
 const sendToken = require("../utils/jwtToken")
 const { isAuthenticated } = require("../middleware/auth")
+const user = require("../model/user")
 
 router.post("/create-user", upload.single("file"), async (req, res, next) => {
 	try {
@@ -171,6 +172,207 @@ router.get(
 			res.status(200).json({
 				success: true,
 				message: "User logged out successfully",
+			})
+		} catch (error) {
+			return next(new ErrorHandler(error.message, 500))
+		}
+	})
+)
+
+// update user info
+router.put(
+	"/update-user-info",
+	isAuthenticated,
+	catchAsyncErrors(async (req, res, next) => {
+		try {
+			const { password, email, name, phoneNumber } = req.body
+
+			const dbUser = await User.findById(req.user).select("+password")
+
+			console.log(dbUser)
+
+			if (!dbUser)
+				return next(new ErrorHandler("Please Login to update info", 400))
+
+			const isPasswordCorrect = await dbUser.comparePassword(password)
+
+			if (!isPasswordCorrect)
+				return next(new ErrorHandler("Wrong Password. Please try again", 400))
+
+			dbUser.name = name
+			dbUser.email = email
+			dbUser.phoneNumber = phoneNumber
+
+			await dbUser.save()
+
+			res.status(200).json({
+				success: true,
+				user: dbUser,
+			})
+		} catch (error) {
+			return next(new ErrorHandler(error.message, 500))
+		}
+	})
+)
+
+// update user avater
+router.put(
+	"/update-avatar",
+	isAuthenticated,
+	upload.single("image"),
+	catchAsyncErrors(async (req, res, next) => {
+		try {
+			const existingUser = await User.findById(req.user.id)
+			const existingPath = `uploads/${existingUser.avatar}`
+
+			if (fs.existsSync(existingPath)) {
+				fs.unlinkSync(existingPath)
+			}
+
+			const fileUrl = path.join(req.file.filename)
+
+			const user = await User.findByIdAndUpdate(req.user.id, {
+				avatar: fileUrl,
+			})
+
+			res.status(200).json({
+				success: true,
+				user,
+			})
+		} catch (error) {
+			return next(new ErrorHandler(error.message, 500))
+		}
+	})
+)
+
+// Update user address
+router.put(
+	"/update-user-address",
+	isAuthenticated,
+	catchAsyncErrors(async (req, res, next) => {
+		try {
+			const user = await User.findById(req.user.id)
+			const sameTypeAddress = user.address.find(
+				(addres) => addres.addressType === req.body.addressType
+			)
+
+			if (sameTypeAddress) {
+				return next(
+					new ErrorHandler(
+						`${req.body.addressType} address already exists`,
+						400
+					)
+				)
+			}
+
+			const existAddress = user.address.find(
+				(addres) => addres._id === req.body._id
+			)
+
+			if (existAddress) {
+				Object.assign(existAddress, req.body)
+			} else {
+				user.address.push(req.body)
+			}
+
+			await user.save()
+
+			res.status(200).json({
+				success: true,
+				user,
+			})
+		} catch (error) {
+			return next(new ErrorHandler(error.message, 500))
+		}
+	})
+)
+
+// Update user address
+router.delete(
+	"/delete-user-address/:id",
+	isAuthenticated,
+	catchAsyncErrors(async (req, res, next) => {
+		try {
+			const userId = req.user.id
+			const addressId = req.params.id
+
+			await User.updateOne(
+				{ _id: userId },
+				{
+					$pull: {
+						address: {
+							_id: addressId,
+						},
+					},
+				}
+			)
+
+			const user = await User.findById(userId)
+
+			res.status(200).json({
+				success: true,
+				user,
+			})
+		} catch (error) {
+			return next(new ErrorHandler(error.message, 500))
+		}
+	})
+)
+
+// Update user address
+router.put(
+	"/update-user-password",
+	isAuthenticated,
+	catchAsyncErrors(async (req, res, next) => {
+		try {
+			const { newPassword, oldPassword, confirmPassword } = req.body
+
+			// find user base on current login user
+
+			const user = await User.findById(req.user.id).select("+password")
+			const comparePassword = await user.comparePassword(oldPassword)
+
+			if (!comparePassword) {
+				return next(
+					new ErrorHandler("Your old password is not correct, try again!", 400)
+				)
+			}
+
+			if (newPassword !== confirmPassword) {
+				return next(
+					new ErrorHandler("Your passwords do not match, try again!", 400)
+				)
+			}
+
+			user.password = newPassword
+
+			await user.save()
+
+			res.status(200).json({
+				success: true,
+				message: "Password successfully changed",
+			})
+		} catch (error) {
+			return next(new ErrorHandler(error.message, 500))
+		}
+	})
+)
+
+// find user information with user ID
+// load user
+router.get(
+	"/user-info/:id",
+	catchAsyncErrors(async (req, res, next) => {
+		try {
+			const user = await User.findById(req.params.id)
+
+			if (!user) {
+				return next(new ErrorHandler("User doesn't exists", 400))
+			}
+
+			res.status(200).json({
+				success: true,
+				user,
 			})
 		} catch (error) {
 			return next(new ErrorHandler(error.message, 500))

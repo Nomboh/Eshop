@@ -1,9 +1,5 @@
 import React from "react"
-import {
-	AiOutlineCreditCard,
-	AiOutlineLogin,
-	AiOutlineMessage,
-} from "react-icons/ai"
+import { AiOutlineLogin, AiOutlineMessage } from "react-icons/ai"
 import { HiOutlineReceiptRefund, HiOutlineShoppingBag } from "react-icons/hi"
 import { MdOutlineTrackChanges } from "react-icons/md"
 import { TbAddressBook } from "react-icons/tb"
@@ -12,6 +8,7 @@ import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { server } from "../../server"
 import { toast } from "react-toastify"
+import { RiLockPasswordLine } from "react-icons/ri"
 
 const ProfileSideBar = ({ setActive, active }) => {
 	const navigate = useNavigate()
@@ -91,12 +88,12 @@ const ProfileSideBar = ({ setActive, active }) => {
 			<div
 				className="flex items-center cursor-pointer w-full mb-8"
 				onClick={() => setActive(6)}>
-				<AiOutlineCreditCard size={20} color={active === 6 ? "red" : ""} />
+				<RiLockPasswordLine size={20} color={active === 6 ? "red" : ""} />
 				<span
 					className={`pl-3 ${
 						active === 6 ? "text-[red]" : ""
 					} 800px:block hidden`}>
-					Payment Methods
+					Change Password
 				</span>
 			</div>
 

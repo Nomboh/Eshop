@@ -1,13 +1,13 @@
 const express = require("express")
 const catchAsyncErrors = require("../middleware/catchAsyncErrors")
-const { isSeller } = require("../middleware/auth")
+const { isSeller, isAuthenticated } = require("../middleware/auth")
 const router = express.Router()
 const Product = require("../model/product")
 const Shop = require("../model/shop")
 const { upload } = require("../multer")
 const ErrorHandler = require("../utils/ErrorHandler")
 const fs = require("fs")
-const shop = require("../model/shop")
+const Order = require("../model/order")
 
 // Create Products
 router.post(
@@ -97,7 +97,7 @@ router.get(
 	"/get-all-products",
 	catchAsyncErrors(async (req, res, next) => {
 		try {
-			const products = await Product.find()
+			const products = await Product.find().sort({ createdAt: -1 })
 
 			res.status(201).json({
 				success: true,
@@ -105,6 +105,70 @@ router.get(
 			})
 		} catch (error) {
 			return next(new ErrorHandler(error, 400))
+		}
+	})
+)
+
+// Review for a product
+router.put(
+	"/create-new-review",
+	isAuthenticated,
+	catchAsyncErrors(async (req, res, next) => {
+		try {
+			const { rating, user, productId, orderId, comment } = req.body
+
+			const product = await Product.findById(productId)
+
+			const isReviewed = await product.reviews.find(
+				(item) => item.user._id === user._id
+			)
+
+			const review = {
+				rating,
+				user,
+				product,
+				orderId,
+				comment,
+			}
+
+			if (isReviewed) {
+				product.reviews.forEach((rev) => {
+					if (rev.user._id === user._id) {
+						rev.rating === rating, rev.comment === comment
+					}
+				})
+			} else {
+				product.reviews.push(review)
+			}
+
+			let avgRatings = 0
+
+			product.reviews.forEach((rev) => {
+				avgRatings += rev.rating
+			})
+
+			product.ratings = avgRatings / product.reviews.length
+
+			await product.save({
+				validateBeforeSave: false,
+			})
+
+			await Order.findByIdAndUpdate(
+				orderId,
+				{
+					$set: {
+						"cart.$[elem].isReviewed": true,
+					},
+				},
+				{
+					arrayFilters: [{ "elem._id": productId }],
+					new: true,
+				}
+			)
+
+			res.status(200).json({ success: true, message: "Reviewed successfully" })
+		} catch (error) {
+			return next(new ErrorHandler(error.message, 500))
 		}
 	})
 )

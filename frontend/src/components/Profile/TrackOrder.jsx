@@ -1,24 +1,23 @@
 import { DataGrid } from "@mui/x-data-grid"
 import { Button } from "@mui/material"
 import { Link } from "react-router-dom"
-import { MdOutlineTrackChanges } from "react-icons/md"
+import { MdTrackChanges } from "react-icons/md"
+import { useDispatch, useSelector } from "react-redux"
+import { getAllOrders } from "../../redux/actions/order"
+import { useEffect } from "react"
 
 const TrackOrder = () => {
-	const orders = [
-		{
-			_id: "7463hvbfbhfbrtr28820221",
-			orderItems: [
-				{
-					name: "Iphone 14 pro max",
-				},
-			],
-			totalPrice: 120,
-			orderStatus: "Processing",
-		},
-	]
+	const { allOrders } = useSelector((state) => state.order)
+	const { user } = useSelector((state) => state.user)
+	const dispatch = useDispatch()
+
+	useEffect(() => {
+		dispatch(getAllOrders(user._id))
+	}, [dispatch])
 
 	const columns = [
 		{ field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
+
 		{
 			field: "status",
 			headerName: "Status",
@@ -43,19 +42,20 @@ const TrackOrder = () => {
 			minWidth: 130,
 			flex: 0.8,
 		},
+
 		{
 			field: " ",
 			flex: 1,
-			minWidth: 130,
+			minWidth: 150,
 			headerName: "",
 			type: "number",
 			sortable: false,
 			renderCell: (params) => {
 				return (
 					<>
-						<Link to={`/order/${params.id}`}>
+						<Link to={`/user/track/order/${params.id}`}>
 							<Button>
-								<MdOutlineTrackChanges size={20} />
+								<MdTrackChanges size={20} />
 							</Button>
 						</Link>
 					</>
@@ -66,22 +66,21 @@ const TrackOrder = () => {
 
 	const row = []
 
-	orders &&
-		orders.forEach((item) => {
+	allOrders &&
+		allOrders.forEach((item) => {
 			row.push({
 				id: item._id,
-				itemsQty: item.orderItems.length,
+				itemsQty: item.cart.length,
 				total: "US$ " + item.totalPrice,
-				status: item.orderStatus,
+				status: item.status,
 			})
 		})
-
 	return (
 		<div className="pl-8 pt-1">
 			<DataGrid
 				rows={row}
 				columns={columns}
-				pageSize={10}
+				pageSizeOptions={[10]}
 				disableSelectionOnClick
 				autoHeight
 			/>

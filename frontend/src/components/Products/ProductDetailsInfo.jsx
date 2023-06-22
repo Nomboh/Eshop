@@ -2,8 +2,14 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import styles from "../../styles/styles"
 import { backend_url } from "../../server"
+import Ratings from "../../components/Ratings.jsx"
 
-const ProductDetailsInfo = ({ data, products }) => {
+const ProductDetailsInfo = ({
+	data,
+	products,
+	totalReview,
+	ratingsAverage,
+}) => {
 	const [active, setActive] = useState(1)
 
 	return (
@@ -55,8 +61,30 @@ const ProductDetailsInfo = ({ data, products }) => {
 			) : null}
 
 			{active === 2 ? (
-				<div className="w-full justify-center min-h-[40vh] flex items-center">
-					<p>No Reviews yet!</p>
+				<div className="w-full min-h-[40vh] flex-col flex items-center py-3 overflow-y-scroll">
+					{data &&
+						data?.reviews?.map((items) => (
+							<div key={items._id} className=" w-full flex my-2">
+								<img
+									src={`${backend_url}/${items.user.avatar}`}
+									alt=""
+									className=" w-[60px] h-[60px] rounded-full"
+								/>
+								<div className=" pl-2">
+									<div className=" w-full flex items-center">
+										<h1 className=" mr-4  font-[500]">{items.user.name}</h1>
+										<Ratings rating={data.ratings} />
+									</div>
+									<p>{items.comment}</p>
+								</div>
+							</div>
+						))}
+
+					<div className="w-full flex justify-center">
+						{data && data?.reviews?.length === 0 && (
+							<h5>There are no reviews for this product</h5>
+						)}
+					</div>
 				</div>
 			) : null}
 
@@ -71,7 +99,9 @@ const ProductDetailsInfo = ({ data, products }) => {
 							/>
 							<div className="pl-3">
 								<h3 className={`${styles.shop_name}`}>{data.shop.name}</h3>
-								<h5 className="pb-2 text-[15px]">(4.5) Ratings</h5>
+								<h5 className="pb-2 text-[15px]">
+									({ratingsAverage}/5) Ratings
+								</h5>
 							</div>
 						</div>
 						<p className="pt-2">
@@ -96,9 +126,9 @@ const ProductDetailsInfo = ({ data, products }) => {
 								</span>
 							</h5>
 							<h5 className="font-[600] pt-3">
-								Total Reviews: <span className="font-[500]">324</span>
+								Total Reviews: <span className="font-[500]">{totalReview}</span>
 							</h5>
-							<Link to="/">
+							<Link to={`/shop/preview/${data.shop._id}`}>
 								<div
 									className={`${styles.button} !rounded-[4px] !h-[39.5px] mt-3`}>
 									<h4 className="text-white">Visit Shop</h4>

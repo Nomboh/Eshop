@@ -9,7 +9,10 @@ const BestDeals = () => {
 	const { allProducts } = useSelector((state) => state.product)
 
 	useEffect(() => {
-		const firstFive = allProducts && allProducts.slice(0, 5)
+		const productData = allProducts && [...allProducts]
+		const sortedProducts =
+			productData && productData.sort((a, b) => b.sold_out - a.sold_out)
+		const firstFive = sortedProducts && sortedProducts.slice(0, 5)
 		setData(firstFive)
 	}, [allProducts])
 

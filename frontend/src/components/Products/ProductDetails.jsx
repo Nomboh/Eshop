@@ -9,19 +9,43 @@ import {
 } from "react-icons/ai"
 import { useDispatch, useSelector } from "react-redux"
 import { getAllProductsShop } from "../../redux/actions/product"
-import { backend_url } from "../../server"
+import { backend_url, server } from "../../server"
+import { toast } from "react-toastify"
+import { addToCart } from "../../redux/actions/cart"
+import { Link, useNavigate } from "react-router-dom"
+import { addToWishlist, removeFromWishlist } from "../../redux/actions/wishlist"
+import axios from "axios"
 
 function ProductDetails({ data }) {
 	const [count, setCount] = useState(1)
 	const [click, setClick] = useState(false)
 	const [select, setSelect] = useState(0)
 	const dispatch = useDispatch()
+	const navigate = useNavigate()
 
 	const { products } = useSelector((state) => state.product)
+	const { user, isAuthenticated } = useSelector((state) => state.user)
+	const { cart } = useSelector((state) => state.cart)
+	const { wishlist } = useSelector((state) => state.wishlist)
 
 	useEffect(() => {
-		dispatch(getAllProductsShop(data && data.shop._id))
-	}, [dispatch, data])
+		dispatch(getAllProductsShop(data && data?.shop._id))
+		if (wishlist && wishlist?.find((wl) => wl._id === data?._id)) {
+			setClick(true)
+		} else {
+			setClick(false)
+		}
+	}, [wishlist, dispatch, data])
+
+	const removeFromWishlistHandler = (data) => {
+		setClick(!click)
+		dispatch(removeFromWishlist(data))
+	}
+
+	const addToWishlistHandler = (data) => {
+		setClick(!click)
+		dispatch(addToWishlist(data))
+	}
 
 	const incrementCount = () => {
 		setCount(count + 1)
@@ -32,9 +56,55 @@ function ProductDetails({ data }) {
 		}
 	}
 
-	const handleMessageSubmit = () => {
-		console.log("chat")
+	const handleMessageSubmit = async () => {
+		if (isAuthenticated) {
+			const groupTitle = user._id + data?.shop._id
+			const userId = user._id
+			const sellerId = data.shop._id
+
+			await axios
+				.post(`${server}/conversation/create-conversation`, {
+					groupTitle,
+					userId,
+					sellerId,
+				})
+				.then((res) => {
+					navigate(`/conversation/${res.data.conversation._id}`)
+				})
+				.catch((err) => toast.error(err.response.data.message))
+		} else {
+			toast.error("Please login to create a conversation")
+		}
 	}
+
+	const handleAddToCart = (id) => {
+		const itemInCart = cart.find((ct) => ct._id === id)
+		if (itemInCart) {
+			toast.error("Item already in Cart")
+		} else {
+			if (data.stock < count)
+				toast.error(`Product limite excited ${data.stock}`)
+			else {
+				const cartData = { ...data, qty: count }
+				dispatch(addToCart(cartData))
+				toast.success("Item added to cart successfully")
+			}
+		}
+	}
+
+	const totalReview =
+		products &&
+		products.reduce((total, product) => total + product.reviews.length, 0)
+
+	const totalRatings =
+		products &&
+		products.reduce(
+			(total, product) =>
+				total + product.reviews.reduce((sum, rat) => sum + rat.rating, 0),
+			0
+		)
+
+	const ratingsAverage = totalRatings / totalReview || 0
 	return (
 		<div className=" bg-white">
 			{data ? (
@@ -48,7 +118,7 @@ function ProductDetails({ data }) {
 									className=" w-[80%]"
 								/>
 
-								<div className="w-full gap-2 flex overflow-x-scroll">
+								<div className="w-full gap-2 flex overflow-x-scroll mt-3">
 									{data &&
 										data.images.map((i, index) => (
 											<div
@@ -101,7 +171,7 @@ function ProductDetails({ data }) {
 											<AiFillHeart
 												size={30}
 												className="cursor-pointer"
-												onClick={() => setClick(!click)}
+												onClick={() => removeFromWishlistHandler(data)}
 												color={click ? "red" : "#333"}
 												title="Remove from wishlist"
 											/>
@@ -109,7 +179,7 @@ function ProductDetails({ data }) {
 											<AiOutlineHeart
 												size={30}
 												className="cursor-pointer"
-												onClick={() => setClick(!click)}
+												onClick={() => addToWishlistHandler(data)}
 												color={click ? "red" : "#333"}
 												title="Add to wishlist"
 											/>
@@ -118,23 +188,30 @@ function ProductDetails({ data }) {
 								</div>
 
 								<div
-									className={`${styles.button} !mt-6 !rounded !h-11 flex items-center`}>
+									className={`${styles.button} !mt-6 !rounded !h-11 flex items-center`}
+									onClick={() => handleAddToCart(data._id)}>
 									<span className="text-white flex items-center">
 										Add to cart <AiOutlineShoppingCart className="ml-1" />
 									</span>
 								</div>
 
 								<div className="flex items-center pt-8">
-									<img
-										src={`${backend_url}${data?.shop?.avatar}`}
-										alt=""
-										className="w-[50px] h-[50px] rounded-full mr-2"
-									/>
+									<Link to={`/shop/preview/${data.shop._id}`}>
+										<img
+											src={`${backend_url}${data?.shop?.avatar}`}
+											alt=""
+											className="w-[50px] h-[50px] rounded-full mr-2"
+										/>
+									</Link>
 									<div className="pr-8">
-										<h3 className={`${styles.shop_name} pb-1 pt-1`}>
-											{data.shop.name}
-										</h3>
-										<h5 className="pb-3 text-[15px]">(4.5) Ratings</h5>
+										<Link to={`/shop/preview/${data.shop._id}`}>
+											<h3 className={`${styles.shop_name} pb-1 pt-1`}>
+												{data.shop.name}
+											</h3>
+										</Link>
+										<h5 className="pb-3 text-[15px]">
+											({ratingsAverage}/5) Ratings
+										</h5>
 									</div>
 									<div
 										className={`${styles.button} bg-[#6443d1] mt-4 !rounded !h-11`}
@@ -147,7 +224,12 @@ function ProductDetails({ data }) {
 							</div>
 						</div>
 					</div>
-					<ProductDetailsInfo data={data} products={products} />
+					<ProductDetailsInfo
+						ratingsAverage={ratingsAverage}
+						totalReview={totalReview}
+						data={data}
+						products={products}
+					/>
 					<br />
 					<br />
 				</div>
