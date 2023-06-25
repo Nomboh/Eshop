@@ -10,7 +10,7 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(
 	cors({
-		origin: "https://eshop-4vtd.vercel.app/",
+		origin: "https://eshop-4vtd.vercel.app",
 		credentials: true,
 	})
 )
