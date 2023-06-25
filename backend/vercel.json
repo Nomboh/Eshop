@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "name": "e-shop-tutorial",
+  "build": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {"src": "/(.*)", "dest": "/server.js"}
+  ]
+}
