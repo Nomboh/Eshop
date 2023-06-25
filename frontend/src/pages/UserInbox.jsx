@@ -10,7 +10,7 @@ import styles from "../styles/styles"
 import socketIO from "socket.io-client"
 import Header from "../components/Layout/Header"
 
-const ENDPOINT = "http://localhost:5500/"
+const ENDPOINT = "https://socket-eshop-dev.onrender.com/"
 
 const socketId = socketIO(ENDPOINT, { transports: ["websocket"] })
 
