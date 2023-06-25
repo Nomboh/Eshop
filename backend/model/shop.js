@@ -11,6 +11,30 @@ const shopSchema = new mongoose.Schema({
 		type: String,
 		required: [true, "Please enter your shop email address"],
 	},
+	availableBalance: {
+		type: Number,
+		default: 0,
+	},
+	withdrawMethod: {
+		type: Object,
+	},
+	transactions: [
+		{
+			amount: {
+				type: Number,
+				required: true,
+			},
+			status: {
+				type: String,
+				default: "Processing",
+			},
+			createdAt: {
+				type: Date,
+				default: Date.now(),
+			},
+			updatedAt: Date,
+		},
+	],
 	password: {
 		type: String,
 		required: [true, "Please enter your password"],

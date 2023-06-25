@@ -69,7 +69,7 @@ function ProductDetails({ data }) {
 					sellerId,
 				})
 				.then((res) => {
-					navigate(`/conversation/${res.data.conversation._id}`)
+					navigate(`/inbox?${res.data.conversation._id}`)
 				})
 				.catch((err) => toast.error(err.response.data.message))
 		} else {
@@ -198,7 +198,7 @@ function ProductDetails({ data }) {
 								<div className="flex items-center pt-8">
 									<Link to={`/shop/preview/${data.shop._id}`}>
 										<img
-											src={`${backend_url}${data?.shop?.avatar}`}
+											src={`${backend_url}${data.shop.avatar}`}
 											alt=""
 											className="w-[50px] h-[50px] rounded-full mr-2"
 										/>

@@ -28,7 +28,7 @@ function Cart({ setOpenCart }) {
 
 	return (
 		<div className="fixed top-0 left-0 w-full h-screen bg-[#00000059] z-10">
-			<div className="fixed top-0 right-0 min-h-full w-2/6 bg-white flex flex-col shadow-sm justify-between">
+			<div className="fixed top-0 right-0 h-full overflow-y-scroll w-5/6 800px:w-2/6 bg-white flex flex-col shadow-sm justify-between">
 				{cart && cart.length === 0 ? (
 					<div className="w-full h-screen flex justify-center items-center">
 						<div className="w-full flex justify-end pt-5 pr-5 fixed top-3 right-3">
@@ -112,18 +112,20 @@ const CartSingle = ({ data, quantityChangeHandler, removeCartHandler }) => {
 
 	return (
 		<div className="border-b p-4">
-			<div className="w-full flex-row flex item-center">
-				<div className="">
-					<div
-						className={`bg-[#e44343] border border-[#e4434373] rounded-full w-[25px] h-[25px] ${styles.noramlFlex} justify-center cursor-pointer`}
-						onClick={() => increment(data)}>
-						<HiPlus size={18} color="#fff" />
-					</div>
-					<span className="px-[10px]">{data.qty}</span>
-					<div
-						className="bg-[#a7abb14f] rounded-full w-[25px] h-[25px] flex items-center justify-center cursor-pointer"
-						onClick={() => decrement(data)}>
-						<HiOutlineMinus size={25} color="#d879c" />
+			<div className="w-full flex-col-reverse  800px:flex-row flex item-center">
+				<div className=" self-center 800px:self-start">
+					<div className=" flex flex-row 800px:flex-col">
+						<div
+							className={`bg-[#e44343] border border-[#e4434373] rounded-full w-[25px] h-[25px] ${styles.noramlFlex} justify-center cursor-pointer`}
+							onClick={() => increment(data)}>
+							<HiPlus size={18} color="#fff" />
+						</div>
+						<span className="px-[10px]">{data.qty}</span>
+						<div
+							className="bg-[#a7abb14f] rounded-full w-[25px] h-[25px] flex items-center justify-center cursor-pointer"
+							onClick={() => decrement(data)}>
+							<HiOutlineMinus size={25} color="#d879c" />
+						</div>
 					</div>
 				</div>
 				<img
@@ -131,19 +133,22 @@ const CartSingle = ({ data, quantityChangeHandler, removeCartHandler }) => {
 					alt={data.name}
 					className="w-[130px] h-min ml-2 rounded-[5px]"
 				/>
-				<div className=" pl-[5px]">
-					<h1>{data.name}</h1>
-					<h4 className=" font-[400px] text-[15px] text-[#00000082]">
-						${data.discountPrice} * {value}
-					</h4>
-					<h4 className=" font-[600] text-[17px] text-[#d02222] font-Roboto">
-						US ${totalPrice}
-					</h4>
+
+				<div className=" w-full flex items-center">
+					<div className=" pl-[5px] w-5/6">
+						<h1>{data.name}</h1>
+						<h4 className=" font-[400px] text-[15px] text-[#00000082]">
+							${data.discountPrice} * {value}
+						</h4>
+						<h4 className=" font-[600] text-[17px] text-[#d02222] font-Roboto">
+							US ${totalPrice}
+						</h4>
+					</div>
+					<RxCross1
+						onClick={() => removeCartHandler(data)}
+						className="cursor-pointer ml-[10px] w-1/6 text-right self-center"
+					/>
 				</div>
-				<RxCross1
-					onClick={() => removeCartHandler(data)}
-					className="cursor-pointer ml-[10px] self-center"
-				/>
 			</div>
 		</div>
 	)

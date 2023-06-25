@@ -4,13 +4,14 @@ import Footer from "../components/Layout/Footer"
 import ProductDetail from "../components/Products/ProductDetails"
 import SuggestedProduct from "../components/Products/SuggestedProduct"
 import { useParams, useSearchParams } from "react-router-dom"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
+import { allProducts } from "../redux/actions/product"
 
 function ProductDetailPage() {
 	const { id } = useParams()
 	const [searchParams] = useSearchParams()
 	const [data, setData] = useState(null)
-	const { allProducts } = useSelector((state) => state.product)
+	const { allProducts: products } = useSelector((state) => state.product)
 	const { allEvents } = useSelector((state) => state.event)
 
 	const eventData = searchParams.get("isEvent")
@@ -21,11 +22,11 @@ function ProductDetailPage() {
 
 			setData(d)
 		} else {
-			const d = allProducts && allProducts.find((i) => i._id === id)
+			const d = products && products.find((i) => i._id === id)
 
 			setData(d)
 		}
-	}, [id, allProducts, eventData])
+	}, [id, products, eventData])
 
 	return (
 		<div>

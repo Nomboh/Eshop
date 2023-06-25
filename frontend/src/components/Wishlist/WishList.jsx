@@ -34,10 +34,10 @@ function WhishList({ setOpenWishList }) {
 	}
 
 	return (
-		<div className="fixed top-0 left-0 w-full h-screen bg-[#00000059] z-10">
-			<div className="fixed top-0 right-0 min-h-full w-2/6 bg-white flex flex-col shadow-sm justify-between">
+		<div className="fixed top-0  left-0 w-full h-screen bg-[#00000059] z-[1000]">
+			<div className="fixed top-0  right-0 h-full overflow-y-scroll w-5/6 800px:w-2/6 bg-white flex flex-col shadow-sm justify-between">
 				{wishlist && wishlist.length === 0 ? (
-					<div className="w-full h-screen flex justify-center items-center">
+					<div className="w-full h-screen flex  justify-center items-center">
 						<div className="w-full flex justify-end pt-5 pr-5 fixed top-3 right-3">
 							<RxCross1
 								size={25}
@@ -45,7 +45,7 @@ function WhishList({ setOpenWishList }) {
 								onClick={() => setOpenWishList(false)}
 							/>
 						</div>
-						<h2>Cart is empty</h2>
+						<h2>Wishlist is empty</h2>
 					</div>
 				) : (
 					<div>
@@ -89,7 +89,7 @@ const CartSingle = ({ data, removeFromWishlistHandler, handleAddToCart }) => {
 
 	return (
 		<div className="border-b p-4">
-			<div className="w-full flex-row flex item-center">
+			<div className="w-full flex-col 800px:flex-row flex item-center">
 				<RxCross1
 					className=" cursor-pointer self-center"
 					onClick={() => removeFromWishlistHandler(data)}

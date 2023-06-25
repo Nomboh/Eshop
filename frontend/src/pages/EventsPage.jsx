@@ -13,10 +13,15 @@ const EventsPage = () => {
 			) : (
 				<div>
 					<Header activeHeading={4} />
-					{allEvents &&
+					{allEvents && allEvents?.length > 0 ? (
 						allEvents.map((event) => (
 							<EventCard key={event._id} active={true} data={event} />
-						))}
+						))
+					) : (
+						<h4 className=" text-center text-4xl mt-12">
+							There are no events at moment
+						</h4>
+					)}
 				</div>
 			)}
 		</>

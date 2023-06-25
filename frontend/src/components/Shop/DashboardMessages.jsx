@@ -25,6 +25,7 @@ function DashboardMessages() {
 	const [userData, setUserData] = useState(null)
 	const [onlineUsers, setOnlineUsers] = useState([])
 	const [activeStatus, setActiveStatus] = useState(false)
+	const [images, setImages] = useState(null)
 
 	const scrollRef = useRef(null)
 
@@ -38,6 +39,7 @@ function DashboardMessages() {
 				sender: data.senderId,
 				text: data.text,
 				createdAt: Date.now(),
+				images: data.images,
 			})
 		})
 	}, [])
@@ -149,6 +151,66 @@ function DashboardMessages() {
 			.catch((error) => console.log(error))
 	}
 
+	const handleImageUpload = async (e) => {
+		const file = e.target.files[0]
+		setImages(file)
+		imageSendingHandler(file)
+	}
+
+	const imageSendingHandler = async (e) => {
+		const formData = new FormData()
+
+		formData.append("images", e)
+		formData.append("sender", seller._id)
+		formData.append("text", newMessage)
+		formData.append("conversationId", currentChat._id)
+
+		const receiverId = currentChat.members.find(
+			(member) => member !== seller._id
+		)
+
+		socketId.emit("sendMessage", {
+			senderId: seller._id,
+			receiverId,
+			images: e,
+		})
+
+		try {
+			await axios
+				.post(`${server}/message/create-message`, formData, {
+					headers: {
+						"Content-Type": "multipart/form-data",
+					},
+				})
+				.then((res) => {
+					console.log(res.data.message)
+					if (res?.data?.message) {
+						socketId.emit("sendMessage", {
+							senderId: seller._id,
+							receiverId,
+							images: res.data.message.images,
+						})
+					}
+
+					setImages()
+					setMessages([...messages, res.data.message])
+					updateLastMessageForImage()
+				})
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
+	const updateLastMessageForImage = async () => {
+		await axios.put(
+			`${server}/conversation/update-last-message/${currentChat._id}`,
+			{
+				lastMessage: "Photo",
+				lastMessageId: seller._id,
+			}
+		)
+	}
+
 	return (
 		<div className=" w-[90%] bg-white m-5 h-[85vh] overflow-y-scroll rounded">
 			{/* All messages list */}
@@ -185,6 +247,7 @@ function DashboardMessages() {
 					userData={userData}
 					activeStatus={activeStatus}
 					scrollRef={scrollRef}
+					handleImageUpload={handleImageUpload}
 				/>
 			) : null}
 		</div>
@@ -273,6 +336,7 @@ const SellerInbox = ({
 	userData,
 	activeStatus,
 	scrollRef,
+	handleImageUpload,
 }) => {
 	return (
 		<div className="w-full min-h-full flex-col justify-between flex">
@@ -320,7 +384,14 @@ const SellerInbox = ({
 											? " bg-slate-700"
 											: "bg-[#38c776]"
 									} p-3 text-white h-min`}>
-									<p>{item.text}</p>
+									{item?.text !== "" && <p>{item.text}</p>}
+
+									{item.images && (
+										<img
+											src={`${backend_url}${item.images}`}
+											className="w-[300px] h-[300px] object-cover rounded-[10px] mr-2"
+										/>
+									)}
 								</div>
 
 								<p className="text-[12px] text-[#000000b5] pt-1">
@@ -336,7 +407,16 @@ const SellerInbox = ({
 				className="p-3 relative w-full flex justify-between items-center"
 				onSubmit={sendMessageHandler}>
 				<div className="w-[30px]">
-					<TfiGallery className="cursor-pointer" size={20} />
+					<input
+						type="file"
+						name=""
+						id="image"
+						className="hidden"
+						onChange={handleImageUpload}
+					/>
+					<label htmlFor="image">
+						<TfiGallery className="cursor-pointer" size={20} />
+					</label>
 				</div>
 				<div className="w-full">
 					<input

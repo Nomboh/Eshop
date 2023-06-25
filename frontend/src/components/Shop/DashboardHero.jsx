@@ -11,7 +11,7 @@ import { DataGrid } from "@mui/x-data-grid"
 
 const DashboardHero = () => {
 	const dispatch = useDispatch()
-	const { shopOrders, availableBalance } = useSelector((state) => state.order)
+	const { shopOrders } = useSelector((state) => state.order)
 	const { seller } = useSelector((state) => state.seller)
 	const { products } = useSelector((state) => state.product)
 
@@ -19,6 +19,8 @@ const DashboardHero = () => {
 		dispatch(getAllShopOrders(seller._id))
 		dispatch(getAllProductsShop(seller._id))
 	}, [dispatch])
+
+	const availableBalance = seller.availableBalance.toFixed(2) * 1
 
 	const columns = [
 		{ field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },

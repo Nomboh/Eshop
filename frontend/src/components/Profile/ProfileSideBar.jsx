@@ -1,16 +1,21 @@
 import React from "react"
 import { AiOutlineLogin, AiOutlineMessage } from "react-icons/ai"
 import { HiOutlineReceiptRefund, HiOutlineShoppingBag } from "react-icons/hi"
-import { MdOutlineTrackChanges } from "react-icons/md"
+import {
+	MdOutlineAdminPanelSettings,
+	MdOutlineTrackChanges,
+} from "react-icons/md"
 import { TbAddressBook } from "react-icons/tb"
 import { RxPerson } from "react-icons/rx"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import axios from "axios"
 import { server } from "../../server"
 import { toast } from "react-toastify"
 import { RiLockPasswordLine } from "react-icons/ri"
+import { useSelector } from "react-redux"
 
 const ProfileSideBar = ({ setActive, active }) => {
+	const { user } = useSelector((state) => state.user)
 	const navigate = useNavigate()
 
 	const logoutHandler = () => {
@@ -120,6 +125,25 @@ const ProfileSideBar = ({ setActive, active }) => {
 					Log out
 				</span>
 			</div>
+
+			{user && user?.role === "Admin" && (
+				<Link to={"/admin/dashboard"}>
+					<div
+						className="single_item flex items-center cursor-pointer w-full mb-8"
+						onClick={() => setActive(9)}>
+						<MdOutlineAdminPanelSettings
+							size={20}
+							color={active === 8 ? "red" : ""}
+						/>
+						<span
+							className={`pl-3 ${
+								active === 9 ? "text-[red]" : ""
+							} 800px:block hidden`}>
+							Admin Dashboard
+						</span>
+					</div>
+				</Link>
+			)}
 		</div>
 	)
 }

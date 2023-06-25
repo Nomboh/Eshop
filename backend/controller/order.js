@@ -1,9 +1,10 @@
 const express = require("express")
 const catchAsyncErrors = require("../middleware/catchAsyncErrors")
-const { isSeller } = require("../middleware/auth")
+const { isSeller, isAdmin, isAuthenticated } = require("../middleware/auth")
 const router = express.Router()
 const Product = require("../model/product")
 const Order = require("../model/order")
+const Shop = require("../model/shop")
 const ErrorHandler = require("../utils/ErrorHandler")
 
 router.post(
@@ -95,6 +96,13 @@ router.put(
 				await product.save({ validateBeforeSave: false })
 			}
 
+			async function updateSellerInfo(amount) {
+				const seller = await Shop.findById(req.seller.id)
+				seller.availableBalance = amount
+
+				await seller.save()
+			}
+
 			if (order.status === "Transferred to delivery partner") {
 				order.cart.forEach((item) => {
 					updateProduct(item._id, item.qty)
@@ -106,6 +114,8 @@ router.put(
 			if (req.body.status === "Delivered") {
 				order.deliveredAt = Date.now()
 				order.paymentInfo.status = "Succeeded"
+				const serviceCharge = order.totalPrice * 0.1
+				updateSellerInfo(order.totalPrice - serviceCharge)
 			}
 
 			await order.save({ validateBeforeSave: false })
@@ -171,6 +181,27 @@ router.put(
 
 				await product.save({ validateBeforeSave: false })
 			}
+		} catch (error) {
+			return next(new ErrorHandler(error.message, 500))
+		}
+	})
+)
+
+// all orders for admin
+router.get(
+	"/admin-all-orders",
+	isAuthenticated,
+	isAdmin("Admin"),
+	catchAsyncErrors(async (req, res, next) => {
+		try {
+			const orders = await Order.find().sort({
+				deliveredAt: -1,
+				createdAt: -1,
+			})
+			res.status(201).json({
+				success: true,
+				orders,
+			})
 		} catch (error) {
 			return next(new ErrorHandler(error.message, 500))
 		}

@@ -53,7 +53,7 @@ export const getAllProductsShop = (id) => async (dispatch) => {
 	}
 }
 
-// Get All Products Shop
+// Get All Products
 export const allProducts = () => async (dispatch) => {
 	try {
 		dispatch({

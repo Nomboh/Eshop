@@ -203,6 +203,7 @@ const Header = ({ activeHeading }) => {
 					</div>
 				</div>
 			</div>
+
 			{/* Mobile Header */}
 			<div
 				className={`${
@@ -241,7 +242,7 @@ const Header = ({ activeHeading }) => {
 				{open && (
 					<div
 						className={`fixed w-full bg-[#0000005f] z-20 h-full top-0 left-0`}>
-						<div className="fixed w-[60%] bg-[#fff] h-screen top-0 left-0 z-10 overflow-y-scroll">
+						<div className="fixed w-[75%] bg-[#fff] h-screen top-0 left-0 z-10 overflow-y-scroll">
 							<div className="w-full justify-between flex pr-3">
 								<div>
 									<div
@@ -249,7 +250,7 @@ const Header = ({ activeHeading }) => {
 										className="relative mr-[15px]">
 										<AiOutlineHeart size={30} className="mt-5 ml-3" />
 										<span class="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px]  leading-tight text-center">
-											0
+											{wishlist && wishlist.length}
 										</span>
 									</div>
 								</div>
@@ -266,36 +267,36 @@ const Header = ({ activeHeading }) => {
 									placeholder="Search Product..."
 									className="h-[40px] w-full px-2 border-[#3957db] border-[2px] rounded-md"
 									value={searchTerm}
-									onChange={handleSearchChange}
+									onChange={(e) => handleSearchChange(e)}
 								/>
 								{searchData && (
 									<div className="absolute bg-[#fff] z-10 shadow w-full left-0 p-3">
-										{searchData.map((i) => {
-											const d = i.name
-
-											const Product_name = d.replace(/\s+/g, "-")
-											return (
-												<Link replace to={`/product/${Product_name}`}>
-													<div className="flex items-center">
-														<img
-															src={i.image_Url[0].url}
-															alt=""
-															className="w-[50px] mr-2"
-														/>
-														<h5>{i.name}</h5>
-													</div>
-												</Link>
-											)
-										})}
+										{searchData &&
+											searchData?.map((i) => {
+												const d = i._id
+												return (
+													<Link replace to={`/product/${d}`}>
+														<div className="flex items-center">
+															<img
+																src={`${backend_url}${i.images[0]}`}
+																alt=""
+																className="w-[50px] mr-2"
+															/>
+															<h5>{i.name}</h5>
+														</div>
+													</Link>
+												)
+											})}
 									</div>
 								)}
 							</div>
 
 							<Navbar active={activeHeading} />
 							<div className={`${styles.button} ml-4 !rounded-[4px]`}>
-								<Link to="/shop-create">
+								<Link to={isSeller ? "/dashboard" : "/shop-create"}>
 									<h1 className="text-[#fff] flex items-center">
-										Become Seller <IoIosArrowForward className="ml-1" />
+										{isSeller ? "Dashboard" : "Become Seller"}{" "}
+										<IoIosArrowForward className="ml-1" />
 									</h1>
 								</Link>
 							</div>
@@ -332,6 +333,12 @@ const Header = ({ activeHeading }) => {
 						</div>
 					</div>
 				)}
+
+				{/* Card Popup Mobile */}
+				{openCart ? <Cart setOpenCart={setOpenCart} /> : null}
+
+				{/* Wish list Popup mobile */}
+				{openWishList ? <WishList setOpenWishList={setOpenWishList} /> : null}
 			</div>
 		</>
 	)

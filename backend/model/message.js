@@ -5,11 +5,7 @@ const messageSchema = new mongoose.Schema(
 		conversationId: String,
 		sender: String,
 		text: String,
-		images: [
-			{
-				type: String,
-			},
-		],
+		images: String,
 	},
 	{
 		timestamps: true,

@@ -40,13 +40,22 @@ import {
 	ShopInboxPage,
 } from "./routes/ShopRoutes"
 
-import { AdminDashboardPage } from "./routes/AdminRoutes"
+import {
+	AdminDashboardPage,
+	AdminDashboardUsers,
+	AdminDashboardSellers,
+	AdminDashboardOrders,
+	AdminDashboardProducts,
+	AdminDashboardEvents,
+	AdminDashboardWithdraw,
+} from "./routes/AdminRoutes"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import Store from "./redux/store"
 import { loadSeller, loadUser } from "./redux/actions/user"
 import ProtectedRoute from "./routes/ProtectedRoute"
 import SellerProtectedRoute from "./routes/SellerProtectedRoute"
+import AdminProtectedRoute from "./routes/AdminProtectedRoute"
 import { allProducts } from "./redux/actions/product"
 import { getAllEvents } from "./redux/actions/event"
 import axios from "axios"
@@ -276,18 +285,77 @@ const App = () => {
 					}
 				/>
 
+				{/* Admin Routes */}
+
+				{/* Admin Dashboard */}
 				<Route
 					path="/admin/dashboard"
 					element={
-						<SellerProtectedRoute>
-							<ShopAllCoupouns />
-						</SellerProtectedRoute>
+						<AdminProtectedRoute>
+							<AdminDashboardPage />
+						</AdminProtectedRoute>
 					}
 				/>
 
-				{/* Admin Routes */}
+				{/* Admin users */}
+				<Route
+					path="/admin-users"
+					element={
+						<AdminProtectedRoute>
+							<AdminDashboardUsers />
+						</AdminProtectedRoute>
+					}
+				/>
 
-				<Route path="admin" element={<AdminDashboardPage />} />
+				{/* Admin sellers */}
+				<Route
+					path="/admin-sellers"
+					element={
+						<AdminProtectedRoute>
+							<AdminDashboardSellers />
+						</AdminProtectedRoute>
+					}
+				/>
+
+				{/* Admin orders */}
+				<Route
+					path="/admin-orders"
+					element={
+						<AdminProtectedRoute>
+							<AdminDashboardOrders />
+						</AdminProtectedRoute>
+					}
+				/>
+
+				{/* Admin Products */}
+				<Route
+					path="/admin-products"
+					element={
+						<AdminProtectedRoute>
+							<AdminDashboardProducts />
+						</AdminProtectedRoute>
+					}
+				/>
+
+				{/* Admin Events */}
+				<Route
+					path="/admin-events"
+					element={
+						<AdminProtectedRoute>
+							<AdminDashboardEvents />
+						</AdminProtectedRoute>
+					}
+				/>
+
+				{/* Admin Withdraw requests*/}
+				<Route
+					path="/admin-withdraw-request"
+					element={
+						<AdminProtectedRoute>
+							<AdminDashboardWithdraw />
+						</AdminProtectedRoute>
+					}
+				/>
 			</Routes>
 
 			<ToastContainer
